@@ -12,15 +12,7 @@ class AlerteController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json(Alerte::with('ligne')->get());
     }
 
     /**
@@ -28,7 +20,15 @@ class AlerteController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'ligne_id' => 'required|exists:lignes,id',
+            'type'     => 'required|in:retard,perturbation,info',
+            'message'  => 'required',
+            'statut'   => 'required|in:active,resolue',
+        ]);
+
+        $alerte = Alerte::create($request->all());
+        return response()->json($alerte->load('ligne'), 201);
     }
 
     /**
@@ -36,15 +36,7 @@ class AlerteController extends Controller
      */
     public function show(Alerte $alerte)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Alerte $alerte)
-    {
-        //
+        return response()->json($alerte->load('ligne'));
     }
 
     /**
@@ -52,7 +44,8 @@ class AlerteController extends Controller
      */
     public function update(Request $request, Alerte $alerte)
     {
-        //
+        $alerte->update($request->all());
+        return response()->json($alerte->load('ligne'));
     }
 
     /**
@@ -60,6 +53,7 @@ class AlerteController extends Controller
      */
     public function destroy(Alerte $alerte)
     {
-        //
+        $alerte->delete();
+        return response()->json(['message' => 'Alerte supprimée']);
     }
 }

@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Ahmed Client',
             'email' => 'client@test.com',
-            'password' => Hash::make('password'), //creer un random mdp a partir de laravel.
+            'password' => Hash::make('password'), //Sauvgarder le mot de passe 'password' de manière sécurisée (hashé = lettre aléatoire)
             'role' => 'client',
             'active' => true,
         ]);
@@ -28,6 +28,14 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'chauffeur',
             'active' => true,
+        ]);
+
+        User::create([
+            'name'     => 'Admin',
+            'email'    => 'admin@issalfes.ma', // email unique admin
+            'password' => Hash::make('admin1234'),
+            'role'     => 'admin',
+            'active'   => true,
         ]);
     }
 }

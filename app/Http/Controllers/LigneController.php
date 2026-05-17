@@ -12,15 +12,7 @@ class LigneController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json(Ligne::all());
     }
 
     /**
@@ -28,7 +20,15 @@ class LigneController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'numero'      => 'required|unique:lignes',
+            'depart'      => 'required',
+            'arrivee'     => 'required',
+            'description' => 'required',
+        ]);
+
+        $ligne = Ligne::create($request->all());
+        return response()->json($ligne, 201);
     }
 
     /**
@@ -36,15 +36,7 @@ class LigneController extends Controller
      */
     public function show(Ligne $ligne)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Ligne $ligne)
-    {
-        //
+        return response()->json($ligne);
     }
 
     /**
@@ -52,7 +44,8 @@ class LigneController extends Controller
      */
     public function update(Request $request, Ligne $ligne)
     {
-        //
+        $ligne->update($request->all());
+        return response()->json($ligne);
     }
 
     /**
@@ -60,6 +53,7 @@ class LigneController extends Controller
      */
     public function destroy(Ligne $ligne)
     {
-        //
+        $ligne->delete();
+        return response()->json(['message' => 'Ligne supprimée']);
     }
 }

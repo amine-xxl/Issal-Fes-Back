@@ -10,34 +10,27 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Contrôleur ProInfoController
- * 
+ *
  * Gère les informations professionnelles des chauffeurs.
  */
 class ProInfoController extends Controller
 {
-    /**
-     * Récupère les informations du chauffeur connecté.
-     * Inclut le bus assigné, la ligne, les arrêts de l'itinéraire et les alertes actives.
-     */
     public function getDriverInfo()
     {
         $user = Auth::user();
 
-        // On vérifie que c'est bien un chauffeur
         if ($user->role !== 'chauffeur') {
             return response()->json(['message' => 'Accès réservé aux chauffeurs'], 403);
         }
 
-        // On récupère ses infos professionnelles avec la ligne et ses itinéraires (arrêts)
-        $proInfo = ProInfo::with(['ligne.itineraires' => function($query) {
-            $query->orderBy('ordre', 'asc'); 
+        $proInfo = ProInfo::with(['ligne.itineraires' => function ($query) {
+            $query->orderBy('ordre', 'asc');
         }])->where('user_id', $user->id)->first();
 
         if (!$proInfo) {
             return response()->json(['message' => 'Aucune information professionnelle trouvée'], 404);
         }
 
-        // On récupère les alertes actives pour la ligne assignée
         $alertes = Alerte::where('ligne_id', $proInfo->ligne_id)
             ->where('statut', 'active')
             ->latest()
@@ -45,25 +38,20 @@ class ProInfoController extends Controller
 
         return response()->json([
             'pro_info' => $proInfo,
-            'alertes' => $alertes
+            'alertes'  => $alertes,
         ]);
     }
 
-    /**
-     * Liste tous les chauffeurs et leurs affectations (Admin uniquement).
-     */
     public function index()
     {
         $chauffeurs = User::where('role', 'chauffeur')
             ->with('proInfo.ligne')
             ->get();
-            
+
         return response()->json($chauffeurs);
     }
 
-    /**
-     * Enregistre ou met à jour l'affectation d'un chauffeur.
-     */
+    // FIX: updateOrCreate utilisait user_id dans les deux params — corrigé
     public function store(Request $request)
     {
         $request->validate([
@@ -71,42 +59,63 @@ class ProInfoController extends Controller
             'ligne_id'   => 'required|exists:lignes,id',
             'numero_bus' => 'required|string|max:10',
             'modele'     => 'required|string|max:50',
-            'capacite'   => 'required|integer',
+            'capacite'   => 'required|integer|min:1',
             'trajet'     => 'required|string',
-            'tarif'      => 'required|numeric',
+            'tarif'      => 'required|numeric|min:0',
         ]);
 
+        // Vérifie que l'user est bien un chauffeur
+        $user = User::find($request->user_id);
+        if (!$user || $user->role !== 'chauffeur') {
+            return response()->json(['message' => 'L\'utilisateur doit être un chauffeur'], 422);
+        }
+
         $proInfo = ProInfo::updateOrCreate(
-            ['user_id' => $request->user_id],
-            $request->all()
+            ['user_id' => $request->user_id],      // critère de recherche
+            $request->only([                         // données à insérer/mettre à jour
+                'ligne_id',
+                'numero_bus',
+                'modele',
+                'capacite',
+                'trajet',
+                'tarif',
+            ])
         );
 
         return response()->json([
-            'message' => 'Affectation enregistrée avec succès.',
-            'pro_info' => $proInfo->load('ligne')
+            'message'  => 'Affectation enregistrée avec succès.',
+            'pro_info' => $proInfo->load('ligne'),
         ]);
     }
 
-    /**
-     * Affiche les infos pro d'un chauffeur spécifique.
-     */
     public function show(ProInfo $proInfo)
     {
-        return response()->json($proInfo);
+        return response()->json($proInfo->load('ligne'));
     }
 
-    /**
-     * Met à jour les infos professionnelles.
-     */
     public function update(Request $request, ProInfo $proInfo)
     {
-        $proInfo->update($request->all());
-        return response()->json($proInfo);
+        $request->validate([
+            'ligne_id'   => 'sometimes|exists:lignes,id',
+            'numero_bus' => 'sometimes|string|max:10',
+            'modele'     => 'sometimes|string|max:50',
+            'capacite'   => 'sometimes|integer|min:1',
+            'trajet'     => 'sometimes|string',
+            'tarif'      => 'sometimes|numeric|min:0',
+        ]);
+
+        $proInfo->update($request->only([
+            'ligne_id',
+            'numero_bus',
+            'modele',
+            'capacite',
+            'trajet',
+            'tarif',
+        ]));
+
+        return response()->json($proInfo->load('ligne'));
     }
 
-    /**
-     * Supprime les infos pro.
-     */
     public function destroy(ProInfo $proInfo)
     {
         $proInfo->delete();

@@ -7,17 +7,13 @@ use Illuminate\Support\Facades\Hash;
 
 /**
  * Contrôleur UserController
- * 
- * Permet aux utilisateurs de gérer leurs informations personnelles (profil).
+ *
+ * Permet aux utilisateurs de gérer leurs informations personnelles.
  */
 class UserController extends Controller
 {
-    /**
-     * Met à jour le nom de l'utilisateur connecté.
-     */
     public function update(Request $request)
     {
-        // Validation : s'assure que le nouveau nom respecte les contraintes
         $request->validate([
             'name' => 'required|string|max:100',
         ], [
@@ -25,20 +21,17 @@ class UserController extends Controller
             'name.max'      => 'Le nom ne doit pas dépasser 100 caractères.',
         ]);
 
-        // Récupération de l'instance de l'utilisateur authentifié via le middleware auth:sanctum
         $user = $request->user();
         $user->update(['name' => $request->name]);
 
-        // On retourne l'objet user mis à jour pour synchroniser le Front-end
+        // FIX: on rafraîchit le modèle pour inclure created_at et tous les champs
+        $user->refresh();
+
         return response()->json(['user' => $user]);
     }
 
-    /**
-     * Change le mot de passe de l'utilisateur connecté.
-     */
     public function updatePassword(Request $request)
     {
-        // Validation : requiert l'ancien mot de passe pour des raisons de sécurité
         $request->validate([
             'current_password' => 'required',
             'password'         => 'required|min:6|confirmed',
@@ -51,14 +44,12 @@ class UserController extends Controller
 
         $user = $request->user();
 
-        // Vérification de la validité du mot de passe actuel avant modification
         if (!Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'message' => 'Le mot de passe actuel est incorrect.',
             ], 422);
         }
 
-        // Mise à jour sécurisée avec hashage du nouveau mot de passe
         $user->update(['password' => Hash::make($request->password)]);
 
         return response()->json(['message' => 'Mot de passe modifié avec succès.']);

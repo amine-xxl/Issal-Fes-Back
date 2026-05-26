@@ -7,59 +7,50 @@ use Illuminate\Http\Request;
 
 /**
  * Contrôleur AlerteController
- * 
- * Ce contrôleur gère les alertes en temps réel concernant les lignes de bus.
- * Il permet d'informer les utilisateurs de tout incident sur le réseau.
+ *
+ * Gère les alertes en temps réel concernant les lignes de bus.
  */
 class AlerteController extends Controller
 {
-    /**
-     * Liste toutes les alertes, en incluant les informations de la ligne concernée.
-     * Utilise le "Eager Loading" (with('ligne')) pour optimiser les requêtes SQL.
-     */
     public function index()
     {
         return response()->json(Alerte::with('ligne')->get());
     }
 
-    /**
-     * Enregistre une nouvelle alerte.
-     */
     public function store(Request $request)
     {
-        // Validation stricte des données de l'alerte
         $request->validate([
-            'ligne_id' => 'required|exists:lignes,id', // Doit correspondre à une ligne existante
+            'ligne_id' => 'required|exists:lignes,id',
             'type'     => 'required|in:retard,perturbation,info',
-            'message'  => 'required',
+            'message'  => 'required|string',
             'statut'   => 'required|in:active,resolue',
         ]);
 
-        $alerte = Alerte::create($request->all());
-        // Retourne l'alerte créée avec les infos de la ligne
+        $alerte = Alerte::create($request->only(['ligne_id', 'type', 'message', 'statut']));
+
         return response()->json($alerte->load('ligne'), 201);
     }
 
-    /**
-     * Affiche les détails d'une alerte spécifique.
-     */
     public function show(Alerte $alerte)
     {
         return response()->json($alerte->load('ligne'));
     }
 
-    /**
-     * Met à jour les informations d'une alerte (ex: changer le statut de 'active' à 'resolue').
-     */
+    // FIX: validation ajoutée sur update (était manquante, vulnérable)
     public function update(Request $request, Alerte $alerte)
     {
-        $alerte->update($request->all());
+        $request->validate([
+            'ligne_id' => 'sometimes|exists:lignes,id',
+            'type'     => 'sometimes|in:retard,perturbation,info',
+            'message'  => 'sometimes|string',
+            'statut'   => 'sometimes|in:active,resolue',
+        ]);
+
+        $alerte->update($request->only(['ligne_id', 'type', 'message', 'statut']));
+
         return response()->json($alerte->load('ligne'));
     }
 
-    /**
-     * Supprime une alerte du système.
-     */
     public function destroy(Alerte $alerte)
     {
         $alerte->delete();

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             AlerteSeeder::class,
             ActualiteSeeder::class,
             ProInfoSeeder::class,
+            ItineraireSeeder::class,
         ]);
     }
 }

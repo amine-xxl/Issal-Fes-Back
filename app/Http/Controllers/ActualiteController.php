@@ -6,10 +6,16 @@ use App\Models\Actualite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Contrôleur ActualiteController
+ * 
+ * Ce contrôleur gère les opérations CRUD (Créer, Lire, Mettre à jour, Supprimer)
+ * pour les actualités affichées sur le site.
+ */
 class ActualiteController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Récupère toutes les actualités triées par date de création (la plus récente d'abord).
      */
     public function index()
     {
@@ -17,21 +23,23 @@ class ActualiteController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Enregistre une nouvelle actualité avec possibilité de télécharger une image.
      */
     public function store(Request $request)
     {
+        // Validation des données entrantes
         $request->validate([
             'titre'   => 'required',
             'contenu' => 'required',
-            'image'   => 'nullable|image|max:2048',
+            'image'   => 'nullable|image|max:2048', // Image optionnelle, max 2Mo
         ]);
 
         $data = $request->only(['titre', 'contenu']);
 
+        // Gestion du téléchargement de l'image si elle est présente
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('actualites', 'public');
-            $data['image'] = '/storage/' . $path;
+            $data['image'] = '/storage/' . $path; // Chemin accessible via le lien symbolique storage
         }
 
         $actualite = Actualite::create($data);
@@ -39,7 +47,7 @@ class ActualiteController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Affiche les détails d'une actualité spécifique.
      */
     public function show(Actualite $actualite)
     {
@@ -47,7 +55,7 @@ class ActualiteController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Met à jour une actualité existante et gère le remplacement de l'image.
      */
     public function update(Request $request, Actualite $actualite)
     {
@@ -58,7 +66,7 @@ class ActualiteController extends Controller
         $data = $request->only(['titre', 'contenu']);
 
         if ($request->hasFile('image')) {
-            // Delete old image if exists
+            // Suppression de l'ancienne image du serveur pour économiser de l'espace
             if ($actualite->image) {
                 $oldPath = str_replace('/storage/', '', $actualite->image);
                 Storage::disk('public')->delete($oldPath);
@@ -72,11 +80,10 @@ class ActualiteController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprime une actualité et son fichier image associé.
      */
     public function destroy(Actualite $actualite)
     {
-        // Delete image file if exists
         if ($actualite->image) {
             $oldPath = str_replace('/storage/', '', $actualite->image);
             Storage::disk('public')->delete($oldPath);

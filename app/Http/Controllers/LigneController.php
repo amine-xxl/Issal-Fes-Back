@@ -3,57 +3,163 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ligne;
+use App\Models\Itineraire;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
+/**
+ * Contrôleur LigneController
+ * 
+ * Gère la gestion complexe des lignes de bus et de leurs arrêts (itineraires).
+ * Ce contrôleur utilise des transactions de base de données pour assurer l'intégrité
+ * des données lors de la création ou de la modification simultanée d'une ligne et de ses arrêts.
+ */
 class LigneController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * ── Afficher la liste des lignes avec leurs itinéraires ──
+     * Récupère toutes les lignes en incluant leurs arrêts triés par ordre logique.
      */
     public function index()
     {
-        return response()->json(Ligne::all());
+        return response()->json(Ligne::with('itineraires')->get());
     }
 
     /**
-     * Store a newly created resource in storage.
+     * ── Créer une nouvelle ligne et ses arrêts ──
+     * Reçoit les infos de base ainsi que deux tableaux (aller et retour) pour les arrêts.
      */
     public function store(Request $request)
     {
+        // Validation des données : le numéro de ligne doit être unique
         $request->validate([
             'numero'      => 'required|unique:lignes',
             'depart'      => 'required',
             'arrivee'     => 'required',
             'description' => 'required',
+            'arrets_aller'  => 'nullable|array|max:7',   // Max 7 arrêts pour l'aller
+            'arrets_retour' => 'nullable|array|max:7',  // Max 7 arrêts pour le retour
         ]);
 
-        $ligne = Ligne::create($request->all());
-        return response()->json($ligne, 201);
+        // Utilisation d'une transaction : si une étape échoue, rien n'est enregistré en base.
+        return DB::transaction(function () use ($request) {
+            
+            // 1. Création de l'entité Ligne
+            $ligne = Ligne::create([
+                'numero'      => $request->numero,
+                'depart'      => $request->depart,
+                'arrivee'     => $request->arrivee,
+                'description' => $request->description,
+            ]);
+
+            // 2. Boucle pour enregistrer chaque arrêt du trajet ALLER
+            if ($request->has('arrets_aller')) {
+                foreach ($request->arrets_aller as $index => $nom_arret) {
+                    if (!empty($nom_arret)) {
+                        Itineraire::create([
+                            'ligne_id'  => $ligne->id,
+                            'direction' => 'aller',
+                            'nom_arret' => $nom_arret,
+                            'ordre'     => $index + 1, // On stocke la position
+                        ]);
+                    }
+                }
+            }
+
+            // 3. Boucle pour enregistrer chaque arrêt du trajet RETOUR
+            if ($request->has('arrets_retour')) {
+                foreach ($request->arrets_retour as $index => $nom_arret) {
+                    if (!empty($nom_arret)) {
+                        Itineraire::create([
+                            'ligne_id'  => $ligne->id,
+                            'direction' => 'retour',
+                            'nom_arret' => $nom_arret,
+                            'ordre'     => $index + 1,
+                        ]);
+                    }
+                }
+            }
+
+            // Retourne la ligne complète avec ses relations chargées
+            return response()->json($ligne->load('itineraires'), 201);
+        });
     }
 
     /**
-     * Display the specified resource.
+     * ── Afficher une ligne précise avec ses itinéraires ──
      */
     public function show(Ligne $ligne)
     {
-        return response()->json($ligne);
+        return response()->json($ligne->load('itineraires'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * ── Mettre à jour une ligne et ses arrêts ──
+     * Pour simplifier la mise à jour des arrêts, on supprime les anciens et on recrée les nouveaux.
      */
     public function update(Request $request, Ligne $ligne)
     {
-        $ligne->update($request->all());
-        return response()->json($ligne);
+        $request->validate([
+            'numero'      => 'required|unique:lignes,numero,' . $ligne->id,
+            'depart'      => 'required',
+            'arrivee'     => 'required',
+            'description' => 'required',
+            'arrets_aller'  => 'nullable|array|max:7',
+            'arrets_retour' => 'nullable|array|max:7',
+        ]);
+
+        return DB::transaction(function () use ($request, $ligne) {
+            
+            // 1. Mise à jour des informations générales de la ligne
+            $ligne->update([
+                'numero'      => $request->numero,
+                'depart'      => $request->depart,
+                'arrivee'     => $request->arrivee,
+                'description' => $request->description,
+            ]);
+
+            // 2. Suppression des anciens itinéraires pour faire place aux nouveaux
+            $ligne->itineraires()->delete();
+
+            // 3. Création des nouveaux arrêts ALLER
+            if ($request->has('arrets_aller')) {
+                foreach ($request->arrets_aller as $index => $nom_arret) {
+                    if (!empty($nom_arret)) {
+                        Itineraire::create([
+                            'ligne_id'  => $ligne->id,
+                            'direction' => 'aller',
+                            'nom_arret' => $nom_arret,
+                            'ordre'     => $index + 1,
+                        ]);
+                    }
+                }
+            }
+
+            // 4. Création des nouveaux arrêts RETOUR
+            if ($request->has('arrets_retour')) {
+                foreach ($request->arrets_retour as $index => $nom_arret) {
+                    if (!empty($nom_arret)) {
+                        Itineraire::create([
+                            'ligne_id'  => $ligne->id,
+                            'direction' => 'retour',
+                            'nom_arret' => $nom_arret,
+                            'ordre'     => $index + 1,
+                        ]);
+                    }
+                }
+            }
+
+            return response()->json($ligne->load('itineraires'));
+        });
     }
 
     /**
-     * Remove the specified resource from storage.
+     * ── Supprimer une ligne ──
+     * La suppression de la ligne entraînera automatiquement celle de ses itinéraires via la base de données.
      */
     public function destroy(Ligne $ligne)
     {
         $ligne->delete();
-        return response()->json(['message' => 'Ligne supprimée']);
+        return response()->json(['message' => 'Ligne supprimée avec succès']);
     }
 }

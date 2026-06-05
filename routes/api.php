@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LigneController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProInfoController;
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,10 @@ Route::get('/alertes',    [AlerteController::class,    'index']);
 
 // ── Routes protégées (utilisateur connecté) ──
 Route::middleware('auth:sanctum')->group(function () {
+
+    // Tickets / Billets
+    Route::post('/billets', [TicketController::class, 'store']);
+    Route::get('/billets',  [TicketController::class, 'index']);
 
     // Infos pro chauffeur
     Route::get('/pro-info', [ProInfoController::class, 'getDriverInfo']);

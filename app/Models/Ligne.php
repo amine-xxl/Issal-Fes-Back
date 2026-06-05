@@ -15,7 +15,7 @@ class Ligne extends Model
     /**
      * Les champs que l'on peut remplir via le contrôleur.
      */
-    protected $fillable = ['numero', 'depart', 'arrivee', 'description'];
+    protected $fillable = ['numero', 'depart', 'arrivee', 'prix', 'description'];
 
     /**
      * Relation : Une ligne peut être associée à plusieurs tickets vendus.

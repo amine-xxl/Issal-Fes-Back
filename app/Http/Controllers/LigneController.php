@@ -36,6 +36,7 @@ class LigneController extends Controller
             'numero'      => 'required|unique:lignes',
             'depart'      => 'required',
             'arrivee'     => 'required',
+            'prix'        => 'required|numeric|min:0',
             'description' => 'required',
             'arrets_aller'  => 'nullable|array|max:7',   // Max 7 arrêts pour l'aller
             'arrets_retour' => 'nullable|array|max:7',  // Max 7 arrêts pour le retour
@@ -49,6 +50,7 @@ class LigneController extends Controller
                 'numero'      => $request->numero,
                 'depart'      => $request->depart,
                 'arrivee'     => $request->arrivee,
+                'prix'        => $request->prix,
                 'description' => $request->description,
             ]);
 
@@ -103,6 +105,7 @@ class LigneController extends Controller
             'numero'      => 'required|unique:lignes,numero,' . $ligne->id,
             'depart'      => 'required',
             'arrivee'     => 'required',
+            'prix'        => 'required|numeric|min:0',
             'description' => 'required',
             'arrets_aller'  => 'nullable|array|max:7',
             'arrets_retour' => 'nullable|array|max:7',
@@ -115,6 +118,7 @@ class LigneController extends Controller
                 'numero'      => $request->numero,
                 'depart'      => $request->depart,
                 'arrivee'     => $request->arrivee,
+                'prix'        => $request->prix,
                 'description' => $request->description,
             ]);
 

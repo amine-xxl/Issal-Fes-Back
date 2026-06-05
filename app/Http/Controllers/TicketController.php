@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ligne;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 
@@ -25,7 +26,25 @@ class TicketController extends Controller
      */
     public function store(Request $request)
     {
-        // Validation et création du ticket pour l'utilisateur authentifié
+        // Validation des données : ligne_id est requis et doit exister
+        $request->validate([
+            'ligne_id' => 'required|exists:lignes,id',
+        ]);
+
+        // On récupère la ligne pour obtenir son prix actuel
+        $ligne = Ligne::findOrFail($request->ligne_id);
+
+        // Création du ticket pour l'utilisateur authentifié (via Sanctum)
+        $ticket = Ticket::create([
+            'user_id'    => $request->user()->id,
+            'ligne_id'   => $ligne->id,
+            'prix'       => $ligne->prix,
+            'statut'     => 'actif',
+            'date_achat' => now(),
+        ]);
+
+        // Retourne le ticket créé avec les infos de la ligne
+        return response()->json($ticket->load('ligne'), 201);
     }
 
     /**

@@ -36,7 +36,6 @@ class AlerteController extends Controller
         return response()->json($alerte->load('ligne'));
     }
 
-    // FIX: validation ajoutée sur update (était manquante, vulnérable)
     public function update(Request $request, Alerte $alerte)
     {
         $request->validate([

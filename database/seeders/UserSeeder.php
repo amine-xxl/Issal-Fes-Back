@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
 
         User::create([
             'name'     => 'Admin',
-            'email'    => 'admin@issalfes.ma', // email unique admin
+            'email'    => 'admin@issalfes.ma', // email unique pour admin
             'password' => Hash::make('admin1234'),
             'role'     => 'admin',
             'active'   => true,

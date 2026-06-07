@@ -18,7 +18,7 @@ class Alerte extends Model
     protected $fillable = ['ligne_id', 'type', 'message', 'statut'];
 
     /**
-     * Relation : Une alerte concerne toujours une ligne de bus spécifique.
+     * Relation : Une alerte appartient toujours à une ligne de bus spécifique.
      */
     public function ligne()
     {

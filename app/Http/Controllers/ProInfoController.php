@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Contrôleur ProInfoController
- *
  * Gère les informations professionnelles des chauffeurs.
  */
 class ProInfoController extends Controller
@@ -23,9 +22,9 @@ class ProInfoController extends Controller
             return response()->json(['message' => 'Accès réservé aux chauffeurs'], 403);
         }
 
-        $proInfo = ProInfo::with(['ligne.itineraires' => function ($query) {
+        $proInfo = ProInfo::with(['ligne.itineraires' => function ($query) { // On trie les itinéraires par ordre d'affichage défini par l'admin
             $query->orderBy('ordre', 'asc');
-        }])->where('user_id', $user->id)->first();
+        }])->where('user_id', $user->id)->first(); // Récupère les infos pro du premier chauffeur connecté, avec sa ligne et ses itinéraires triés
 
         if (!$proInfo) {
             return response()->json(['message' => 'Aucune information professionnelle trouvée'], 404);
@@ -51,7 +50,6 @@ class ProInfoController extends Controller
         return response()->json($chauffeurs);
     }
 
-    // FIX: updateOrCreate utilisait user_id dans les deux params — corrigé
     public function store(Request $request)
     {
         $request->validate([
@@ -67,12 +65,12 @@ class ProInfoController extends Controller
         // Vérifie que l'user est bien un chauffeur
         $user = User::find($request->user_id);
         if (!$user || $user->role !== 'chauffeur') {
-            return response()->json(['message' => 'L\'utilisateur doit être un chauffeur'], 422);
+            return response()->json(['message' => 'L\'utilisateur doit être un chauffeur'], 422); // 422 Unprocessable Entity car c'est une validation métier spécifique
         }
 
-        $proInfo = ProInfo::updateOrCreate(
-            ['user_id' => $request->user_id],      // critère de recherche
-            $request->only([                         // données à insérer/mettre à jour
+        $proInfo = ProInfo::updateOrCreate( // updateOrCreate pour éviter les doublons si le chauffeur a déjà des infos pro
+            ['user_id' => $request->user_id], // Condition de recherche : on cherche les infos pro du chauffeur
+            $request->only([ // Seules les colonnes pertinentes sont prises en compte pour la création ou la mise à jour
                 'ligne_id',
                 'numero_bus',
                 'modele',
@@ -84,7 +82,7 @@ class ProInfoController extends Controller
 
         return response()->json([
             'message'  => 'Affectation enregistrée avec succès.',
-            'pro_info' => $proInfo->load('ligne'),
+            'pro_info' => $proInfo->load('ligne'), // On charge la relation ligne pour retourner les infos complètes <=> appel a la relation
         ]);
     }
 

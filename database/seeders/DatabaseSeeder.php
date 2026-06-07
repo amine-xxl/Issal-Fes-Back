@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ActualiteSeeder::class,
             ProInfoSeeder::class,
             ItineraireSeeder::class,
+            MessageSeeder::class,
         ]);
     }
 }

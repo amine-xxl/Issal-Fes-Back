@@ -19,7 +19,6 @@ class AuthController extends Controller
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|unique:users',
             'password' => 'required|min:6|confirmed',
-            // FIX: admin ajouté pour permettre la création via seeder/API
             'role'     => 'in:client,chauffeur,admin',
         ], [
             'name.required'    => 'Veuillez Entrer Votre Nom !',
@@ -38,6 +37,7 @@ class AuthController extends Controller
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => $request->role ?? 'client',
+            'active'   => true, // Assurer que le compte est actif par défaut
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;

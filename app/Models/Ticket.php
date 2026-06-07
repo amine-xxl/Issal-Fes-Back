@@ -16,11 +16,11 @@ class Ticket extends Model
      * Attributs remplissables.
      */
     protected $fillable = [
-        'user_id',   // L'acheteur
-        'ligne_id',  // La ligne concernée
-        'prix',      // Montant payé
-        'statut',    // Ex: valide, utilisé, expiré
-        'date_achat' // Date de transaction
+        'user_id',
+        'ligne_id',
+        'prix',
+        'statut',
+        'date_achat'
     ];
 
     /**
@@ -32,7 +32,7 @@ class Ticket extends Model
     }
 
     /**
-     * Relation : Un ticket est valable pour une ligne de bus spécifique.
+     * Relation : Un ticket  appartient à une ligne de bus spécifique.
      */
     public function ligne()
     {

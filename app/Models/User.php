@@ -22,21 +22,18 @@ class User extends Authenticatable
         'active',
     ];
 
-    protected $hidden = [
+    protected $hidden = [ // Masquer les champs sensibles lors de la sérialisation
         'password',
         'remember_token',
     ];
 
-    // FIX: created_at ajouté dans $appends pour qu'il soit toujours inclus dans les réponses JSON
-    protected $appends = [];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-            // FIX: active casté en booléen
-            'active'            => 'boolean',
+            'password' => 'hashed',
+            'active' => 'boolean',
         ];
     }
 

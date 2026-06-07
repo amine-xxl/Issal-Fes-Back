@@ -16,10 +16,10 @@ class Message extends Model
      * Attributs remplissables.
      */
     protected $fillable = [
-        'name',      // Nom de l'expéditeur
-        'email',     // Email pour la réponse
-        'subject',   // Objet du message
-        'message',   // Corps du message
-        'subscribe'  // Inscription newsletter (booléen)
+        'name',
+        'email',
+        'subject',
+        'message',
+        'subscribe'
     ];
 }

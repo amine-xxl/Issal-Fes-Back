@@ -16,13 +16,13 @@ class ProInfo extends Model
      * Attributs remplissables.
      */
     protected $fillable = [
-        'user_id',    // Le chauffeur concerné
-        'ligne_id',   // La ligne qu'il dessert
-        'numero_bus', // Identifiant unique du véhicule
-        'modele',     // Marque/Modèle du bus
-        'capacite',   // Nombre de places
-        'trajet',     // Description textuelle du parcours
-        'tarif'       // Tarif appliqué sur cette ligne
+        'user_id',
+        'ligne_id',
+        'numero_bus',
+        'modele',
+        'capacite',
+        'trajet',
+        'tarif'
     ];
 
     /**

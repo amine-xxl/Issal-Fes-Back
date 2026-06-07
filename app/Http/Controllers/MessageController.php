@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Contrôleur MessageController
- * 
  * Gère l'envoi des messages depuis le formulaire de contact du Front-end.
  */
 class MessageController extends Controller
@@ -42,7 +42,8 @@ class MessageController extends Controller
      */
     public function index()
     {
-        return response()->json(Message::latest()->get());
+        $messages = Message::latest()->get();
+        return response()->json($messages); // Affiche les messages du plus récent au plus ancien
     }
 
     /**

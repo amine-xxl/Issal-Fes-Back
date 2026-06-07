@@ -23,7 +23,7 @@ Route::get('/alertes',    [AlerteController::class,    'index']);
 // ── Routes protégées (utilisateur connecté) ──
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Tickets / Billets
+    // Billets
     Route::post('/billets', [TicketController::class, 'store']);
     Route::get('/billets',  [TicketController::class, 'index']);
 
@@ -42,12 +42,10 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::apiResource('admin/lignes', LigneController::class)->except(['index']);
 
     // Actualités
-    // FIX: on utilise POST pour store et POST avec _method=PUT pour update
-    // car le frontend envoie FormData (multipart) qui ne supporte pas PUT natif
     Route::get('admin/actualites',              [ActualiteController::class, 'index']);
     Route::post('admin/actualites',             [ActualiteController::class, 'store']);
     Route::get('admin/actualites/{actualite}',  [ActualiteController::class, 'show']);
-    Route::post('admin/actualites/{actualite}', [ActualiteController::class, 'update']);
+    Route::post('admin/actualites/{actualite}', [ActualiteController::class, 'update']); // <-- POST au lieu de PUT car on envoie du FormData car FrontEnd ne supporte pas PUT nativement (voir AjoutNews.jsx)
     Route::delete('admin/actualites/{actualite}', [ActualiteController::class, 'destroy']);
 
     // Alertes

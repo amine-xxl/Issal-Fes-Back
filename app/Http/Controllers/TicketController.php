@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 /**
  * Contrôleur TicketController
- * 
  * Gère le cycle de vie des tickets (achat, validation, historique).
  */
 class TicketController extends Controller
@@ -18,11 +17,11 @@ class TicketController extends Controller
      */
     public function index(Request $request)
     {
-        return response()->json($request->user()->tickets()->with('ligne')->get());
+        return response()->json($request->user()->tickets()->with('ligne')->get()); // Affiche les tickets de l'utilisateur connecté avec les infos de la ligne associée
     }
 
     /**
-     * Enregistre l'achat d'un nouveau ticket.
+     * Enregistre l'achat virtuel d'un nouveau ticket.
      */
     public function store(Request $request)
     {

@@ -31,3 +31,7 @@ return new class extends Migration
         Schema::dropIfExists('personal_access_tokens');
     }
 };
+
+// créée par Laravel Sanctum — c'est là qu'il stocke les tokens d'authentification de tes utilisateurs chaque fois qu'un utilisateur se connecte via
+// AuthController->login, Sanctum génère un token unique et le stocke dans cette table. À chaque requête protégée,
+// Laravel vérifie ce token dans la table pour identifier l'utilisateur.

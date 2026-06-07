@@ -23,18 +23,14 @@ class UserController extends Controller
 
         $user = $request->user();
         $user->update(['name' => $request->name]);
-
-        // FIX: on rafraîchit le modèle pour inclure created_at et tous les champs
-        $user->refresh();
-
         return response()->json(['user' => $user]);
     }
 
     public function updatePassword(Request $request)
     {
         $request->validate([
-            'current_password' => 'required',
-            'password'         => 'required|min:6|confirmed',
+            'current_password' => 'required', // Le mot de passe actuel est nécessaire pour vérifier l'identité de l'utilisateur
+            'password'         => 'required|min:6|confirmed', // Le nouveau mot de passe doit être confirmé pour éviter les erreurs de saisie
         ], [
             'current_password.required' => 'Le mot de passe actuel est obligatoire.',
             'password.required'         => 'Le nouveau mot de passe est obligatoire.',

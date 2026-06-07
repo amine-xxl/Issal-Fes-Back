@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Storage;
  * Contrôleur ActualiteController
  *
  * Gère les opérations CRUD pour les actualités.
- * FIX: update() accepte maintenant POST avec _method=PUT (pour FormData multipart)
  */
 class ActualiteController extends Controller
 {
@@ -43,7 +42,6 @@ class ActualiteController extends Controller
         return response()->json($actualite);
     }
 
-    // FIX: accepte POST avec _method=PUT pour la compatibilité FormData
     public function update(Request $request, Actualite $actualite)
     {
         $request->validate([
@@ -57,7 +55,7 @@ class ActualiteController extends Controller
         if ($request->hasFile('image')) {
             // Supprime l'ancienne image
             if ($actualite->image) {
-                $oldPath = str_replace('/storage/', '', $actualite->image);
+                $oldPath = str_replace('/storage/', '', $actualite->image); // str_replace pour obtenir le chemin relatif
                 Storage::disk('public')->delete($oldPath);
             }
             $path = $request->file('image')->store('actualites', 'public');

@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Modèle Ligne
- * 
  * Ce modèle représente une ligne de transport (ex: Ligne 15).
  * Il contient les informations de base comme le numéro, le départ et l'arrivée.
  */
@@ -18,7 +17,7 @@ class Ligne extends Model
     protected $fillable = ['numero', 'depart', 'arrivee', 'prix', 'description'];
 
     /**
-     * Relation : Une ligne peut être associée à plusieurs tickets vendus.
+     * Relation : Une ligne peut être contenir plusieurs tickets vendus.
      */
     public function tickets()
     {
@@ -26,7 +25,7 @@ class Ligne extends Model
     }
 
     /**
-     * Relation : Une ligne peut avoir plusieurs alertes (ex: retard, panne).
+     * Relation : Une ligne peut avoir plusieurs alertes (ex: retard, panne...).
      */
     public function alertes()
     {
@@ -42,7 +41,7 @@ class Ligne extends Model
     }
 
     /**
-     * Relation : Une ligne possède plusieurs arrêts (points de passage).
+     * Relation : Une ligne possède plusieurs arrêts (arrêt 1, arrêt 2, ...).
      * On trie les arrêts par le champ 'ordre' pour respecter la séquence du trajet.
      */
     public function itineraires()

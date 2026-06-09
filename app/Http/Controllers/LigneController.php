@@ -34,8 +34,8 @@ class LigneController extends Controller
             'arrivee'     => 'required',
             'prix'        => 'required|numeric|min:0',
             'description' => 'required',
-            'arrets_aller'  => 'nullable|array|max:7',   // Max 7 arrêts pour l'aller
-            'arrets_retour' => 'nullable|array|max:7',  // Max 7 arrêts pour le retour
+            'arrets_aller'  => 'nullable|array',
+            'arrets_retour' => 'nullable|array',
         ]);
 
         // 1. Création de l'entité Ligne
@@ -99,8 +99,8 @@ class LigneController extends Controller
             'arrivee'     => 'required',
             'prix'        => 'required|numeric|min:0',
             'description' => 'required',
-            'arrets_aller'  => 'nullable|array|max:7',
-            'arrets_retour' => 'nullable|array|max:7',
+            'arrets_aller'  => 'nullable|array',
+            'arrets_retour' => 'nullable|array',
         ]);
 
         // 1. Mise à jour des informations générales de la ligne

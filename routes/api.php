@@ -23,6 +23,9 @@ Route::get('/alertes',    [AlerteController::class,    'index']);
 // ── Routes protégées (utilisateur connecté) ──
 Route::middleware('auth:sanctum')->group(function () {
 
+    // Déconnexion
+    Route::post('/logout', [AuthController::class, 'logout']);
+
     // Billets
     Route::post('/billets', [TicketController::class, 'store']);
     Route::get('/billets',  [TicketController::class, 'index']);

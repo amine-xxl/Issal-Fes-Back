@@ -14,14 +14,14 @@ class LigneSeeder extends Seeder
     public function run(): void
     {
         Ligne::create([
-            'numero' => 'L1',
+            'numero' => '45',
             'depart' => 'Adarissa',
             'arrivee' => 'Bab Ftouh',
             'description' => 'Ligne principale centre-ville',
         ]);
 
         Ligne::create([
-            'numero' => 'L2',
+            'numero' => '16',
             'depart' => 'Aeroport Fes-Saiss',
             'arrivee' => 'Centre-ville',
             'description' => 'Liaison aéroport - ville nouvelle',
